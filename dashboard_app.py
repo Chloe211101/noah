@@ -29,7 +29,6 @@ st.markdown("---")
 @st.cache_data(ttl=0)
 def load_data():
     try:
-        # 使用英文文件名
         url = "https://raw.githubusercontent.com/Chloe211101/noah/main/orders.xlsx"
         data = pd.read_excel(url)
         
@@ -65,6 +64,48 @@ df = load_data()
 if df.empty:
     st.warning("⚠️ 请将 orders.xlsx 文件上传到 GitHub 仓库")
     st.stop()
+
+# ===== 超期未收款预警（出货超过60天未收清）=====
+st.subheader("⚠️ 超期未收款预警")
+
+today = datetime.now()
+warning_data = []
+
+for _, row in df.iterrows():
+    # 检查：有出货日期、发出状态为已发出、订单状态不是已收清
+    if pd.notna(row['出货日期']) and row['发出状态'] == '已发出' and row['订单状态'] != '已收清':
+        days_since_shipped = (today - row['出货日期']).days
+        if days_since_shipped >= 60:
+            warning_data.append({
+                '业务员': row['业务员'],
+                '订单号': row['订单号'],
+                '客户名称': row['客户名称'],
+                '距离出货天数': days_since_shipped,
+                '未收金额': row['未收金额']
+            })
+
+if len(warning_data) > 0:
+    warning_df = pd.DataFrame(warning_data)
+    warning_df = warning_df.sort_values('距离出货天数', ascending=False)
+    
+    st.warning(f"🚨 发现 {len(warning_data)} 笔订单出货超过60天仍未收清款项！")
+    
+    st.dataframe(
+        warning_df[['业务员', '订单号', '客户名称', '距离出货天数', '未收金额']],
+        column_config={
+            "业务员": "业务员",
+            "订单号": "订单号",
+            "客户名称": "客户名称",
+            "距离出货天数": st.column_config.NumberColumn("距离出货天数", format="%d 天"),
+            "未收金额": st.column_config.NumberColumn("未收金额", format="¥%.0f"),
+        },
+        use_container_width=True,
+        hide_index=True
+    )
+else:
+    st.success("✅ 恭喜！所有已出货订单均在60天内完成收款，无超期预警！")
+
+st.markdown("---")
 
 # 显示加载成功信息
 st.success(f"✅ 成功加载 {len(df)} 条订单数据")
@@ -113,6 +154,7 @@ st.markdown("---")
 
 # ===== 业务员业绩分析 =====
 st.subheader("👔 业务员业绩分析")
+st.markdown("按业务员查看签订和出货情况")
 
 if '业务员' in df.columns and df['业务员'].notna().any():
     salesperson_summary = df.groupby('业务员').agg({
@@ -413,4 +455,4 @@ with col_status3:
         st.write("暂无数据")
 
 st.markdown("---")
-st.caption("💡 修改 orders.xlsx 后上传到 GitHub，然后点击右上角的【刷新数据】按钮即可更新看板 | 所有筛选器可以组合使用，汇总统计会自动更新")
+st.caption("💡 修改 orders.xlsx 后上传到 GitHub，然后点击右上角的【刷新数据】按钮即可更新看板 | 出货超过60天未收清的订单会在顶部预警 | 所有筛选器可以组合使用，汇总统计会自动更新")
