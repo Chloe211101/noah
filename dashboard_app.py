@@ -29,8 +29,8 @@ st.markdown("---")
 @st.cache_data(ttl=0)
 def load_data():
     try:
-        # 直接从 GitHub 仓库读取 Excel 文件
-     url = "https://raw.githubusercontent.com/Chloe211101/noah/main/orders.xlsx"
+        # 使用英文文件名
+        url = "https://raw.githubusercontent.com/Chloe211101/noah/main/orders.xlsx"
         data = pd.read_excel(url)
         
         # 确保必要的列存在
@@ -57,13 +57,13 @@ def load_data():
         return data
     except Exception as e:
         st.error(f"❌ 读取文件出错：{e}")
-        st.info("请确保 GitHub 仓库中有 订单数据.xlsx 文件")
+        st.info("请确保 GitHub 仓库中有 orders.xlsx 文件")
         return pd.DataFrame()
 
 df = load_data()
 
 if df.empty:
-    st.warning("⚠️ 请将订单数据.xlsx文件上传到 GitHub 仓库")
+    st.warning("⚠️ 请将 orders.xlsx 文件上传到 GitHub 仓库")
     st.stop()
 
 # 显示加载成功信息
@@ -413,4 +413,4 @@ with col_status3:
         st.write("暂无数据")
 
 st.markdown("---")
-st.caption("💡 修改Excel后上传到 GitHub 仓库，然后点击右上角的【刷新数据】按钮即可更新看板 | 所有筛选器可以组合使用，汇总统计会自动更新")
+st.caption("💡 修改 orders.xlsx 后上传到 GitHub，然后点击右上角的【刷新数据】按钮即可更新看板 | 所有筛选器可以组合使用，汇总统计会自动更新")
