@@ -30,7 +30,7 @@ st.markdown("---")
 def load_data():
     try:
         # 直接从 GitHub 仓库读取 Excel 文件
-        url = "https://raw.githubusercontent.com/Chloe211101/noah/main/订单数据.xlsx"
+       url = "https://github.com/Chloe211101/noah/raw/main/%E8%AE%A2%E5%8D%95%E6%95%B0%E6%8D%AE.xlsx"
         data = pd.read_excel(url)
         
         # 确保必要的列存在
